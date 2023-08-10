@@ -97,7 +97,11 @@ export default class Ui {
     if (!toolData.file || Object.keys(toolData.file).length === 0) {
       this.toggleStatus(Ui.status.EMPTY);
     } else {
-      this.toggleStatus(Ui.status.UPLOADING);
+      if (toolData.file && toolData.file.url) {
+        this.fillImage(toolData.file.url);
+      } else {
+        this.toggleStatus(Ui.status.UPLOADING);
+      }
     }
 
     return this.nodes.wrapper;
@@ -207,16 +211,17 @@ export default class Ui {
      * Add load event listener
      */
     if (tag === 'VIDEO') {
+      /* eslint handle-callback-err: "warn" */
       this.nodes.imageEl.addEventListener('error', (err) => {
-        console.log('show video error call is ', err);
+
         var date = new Date();
         var milliSecs = date.getMilliseconds();
         var originalSrc = this.nodes.imageEl.children[0].src;
-        var srcSplit = originalSrc.split("?");
+        var srcSplit = originalSrc.split('?');
 
         var currentSrc = srcSplit[0] + '?rand=' + milliSecs;
 
-        this.nodes.imageEl.setAttribute("src",currentSrc);
+        this.nodes.imageEl.setAttribute('src', currentSrc);
         this.nodes.imageEl.querySelector('source').setAttribute('src', currentSrc);
         this.nodes.imageEl.load();
       }, true);
@@ -232,6 +237,7 @@ export default class Ui {
         }
       });
     }
+    this.nodes.imageContainer.innerHTML = '';
 
     this.nodes.imageContainer.appendChild(this.nodes.imageEl);
 
