@@ -9,6 +9,20 @@
 export function make(tagName, classNames = null, attributes = {}) {
   const el = document.createElement(tagName);
 
+  if (tagName === 'VIDEO' && attributes.src) {
+    // eslint-disable-next-line no-tabs
+    const videoSource = attributes.src;
+
+    var elSource = document.createElement('source');
+
+    elSource['src'] = videoSource;
+    el.appendChild(elSource);
+
+
+    delete attributes.loop;
+    delete attributes.autoplay;
+  }
+
   if (Array.isArray(classNames)) {
     el.classList.add(...classNames);
   } else if (classNames) {
@@ -17,6 +31,9 @@ export function make(tagName, classNames = null, attributes = {}) {
 
   for (const attrName in attributes) {
     el[attrName] = attributes[attrName];
+  }
+  if (tagName === 'VIDEO') {
+    el['controls'] = 'controls';
   }
 
   return el;

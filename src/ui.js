@@ -152,10 +152,17 @@ export default class Ui {
     /**
      * Check for a source extension to compose element correctly: video tag for mp4, img — for others
      */
-    const tag = /\.mp4$/.test(url) ? 'VIDEO' : 'IMG';
+    // const tag = /\.mp4$/.test(url) ? 'VIDEO' : 'IMG';
+    var tag = 'IMG';
 
+    if (url.includes('video')) {
+      tag = 'VIDEO';
+    }
+
+    // eslint-disable-next-line camelcase
+    var NewUrl = url;
     const attributes = {
-      src: url,
+      src: NewUrl,
     };
 
     /**
@@ -199,18 +206,42 @@ export default class Ui {
     /**
      * Add load event listener
      */
-    this.nodes.imageEl.addEventListener(eventName, () => {
-      this.toggleStatus(Ui.status.FILLED);
+    if (tag === 'VIDEO') {
+      this.nodes.imageEl.addEventListener('error', (err) => {
+        console.log('show video error call is ', err);
+        var date = new Date();
+        var milliSecs = date.getMilliseconds();
+        var originalSrc = this.nodes.imageEl.children[0].src;
+        var srcSplit = originalSrc.split("?");
 
-      /**
-       * Preloader does not exists on first rendering with presaved data
-       */
+        var currentSrc = srcSplit[0] + '?rand=' + milliSecs;
+
+        this.nodes.imageEl.setAttribute("src",currentSrc);
+        this.nodes.imageEl.querySelector('source').setAttribute('src', currentSrc);
+        this.nodes.imageEl.load();
+      }, true);
+    } else {
+      this.nodes.imageEl.addEventListener(eventName, () => {
+        this.toggleStatus(Ui.status.FILLED);
+
+        /**
+         * Preloader does not exists on first rendering with presaved data
+         */
+        if (this.nodes.imagePreloader) {
+          this.nodes.imagePreloader.style.backgroundImage = '';
+        }
+      });
+    }
+
+    this.nodes.imageContainer.appendChild(this.nodes.imageEl);
+
+    if (tag === 'VIDEO') {
+      this.nodes.imageEl.load();
+      this.toggleStatus(Ui.status.FILLED);
       if (this.nodes.imagePreloader) {
         this.nodes.imagePreloader.style.backgroundImage = '';
       }
-    });
-
-    this.nodes.imageContainer.appendChild(this.nodes.imageEl);
+    }
   }
 
   /**
@@ -250,4 +281,3 @@ export default class Ui {
     this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${tuneName}`, status);
   }
 }
-
